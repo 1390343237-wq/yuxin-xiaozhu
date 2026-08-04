@@ -1,0 +1,15 @@
+{
+  "name": "yuxin-xiaozhu",
+  "version": "1.0.0",
+  "description": "愈心小筑主理人一体化云端工作台 · 腾讯文档代理服务",
+  "main": "server/proxy-node.js",
+  "scripts": {
+    "start": "node server/proxy-node.js",
+    "dev": "node server/proxy-node.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["yuxin", "tencent-docs", "mcp", "ai", "proxy"],
+  "license": "MIT"
+}
