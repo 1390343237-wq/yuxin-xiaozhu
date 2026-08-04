@@ -253,7 +253,7 @@ const server = http.createServer(async (req, res) => {
 
   // ---- 腾讯文档代理 ----
   if (u.pathname.startsWith('/api/')) {
-    const p = u.pathname.slice(4);
+    const p = u.pathname.slice(5); // 跳过 '/api/' 5 个字符
     try {
       if (p === '/sheet/info') {
         const info = await tdocCall('get_sheet_info', { file_id: FILE_ID });
@@ -287,7 +287,7 @@ const server = http.createServer(async (req, res) => {
 
   // ---- KV ----
   if (u.pathname.startsWith('/kv/')) {
-    const p = u.pathname.slice(3);
+    const p = u.pathname.slice(4); // 跳过 '/kv/' 4 个字符
     try {
       if (p === '/get') return send(res, 200, { key: u.query.key, value: kvRead()[u.query.key] ?? null });
       if (p === '/keys') return send(res, 200, { keys: Object.keys(kvRead()).filter(k => k.startsWith(u.query.prefix || '')) });
@@ -303,7 +303,7 @@ const server = http.createServer(async (req, res) => {
 
   // ---- AI ----
   if (u.pathname.startsWith('/ai/')) {
-    const p = u.pathname.slice(3);
+    const p = u.pathname.slice(4); // 跳过 '/ai/' 4 个字符
     if (req.method !== 'POST') return send(res, 405, { error: 'method not allowed' });
     const body = await readBody(req).then(s => { try { return JSON.parse(s); } catch (e) { return {}; } });
     const typeMap = { summarize: 'summarize', recommend: 'recommend', generate: 'generate',
