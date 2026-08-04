@@ -1,0 +1,27 @@
+{
+  "rooms": {
+    "401":  { "id": "401",  "label": "401 套房", "mode": "sublet_only",   "type": "sublet",  "subRooms": ["1","2","3","4"] },
+    "1302": { "id": "1302", "label": "1302 套房", "mode": "whole_or_sublet", "type": "mixed",  "subRooms": ["5","6"] },
+    "407":  { "id": "407",  "label": "407 套房",  "mode": "whole_or_sublet", "type": "mixed",  "subRooms": ["7","8"] },
+    "1502": { "id": "1502", "label": "1502 套房", "mode": "sublet_only",   "type": "sublet",  "subRooms": ["9","10","11","12"] },
+    "503":  { "id": "503",  "label": "503 套房",  "mode": "whole_or_sublet", "type": "mixed",  "subRooms": ["15","16"] },
+    "1202": { "id": "1202", "label": "1202 套房", "mode": "whole_only",    "type": "whole",   "subRooms": [] }
+  },
+  "subRoomsIndex": {
+    "1":"401","2":"401","3":"401","4":"401",
+    "5":"1302","6":"1302",
+    "7":"407","8":"407",
+    "9":"1502","10":"1502","11":"1502","12":"1502",
+    "15":"503","16":"503"
+  },
+  "dataSource": {
+    "file_id": "aGmEiPNlaymu",
+    "mainSheet": { "sheet_id": "vr6hto", "name": "2026年" },
+    "monthlySheet": { "sheet_id": "3p6db7", "name": "月度报表" },
+    "companionSheet": { "sheet_id": "w7wj03", "name": "陪诊" },
+    "consumablesSheet": { "sheet_id": "zhcb7q", "name": "耗材" },
+    "historySheet": { "sheet_id": "46t788", "name": "(历史)订房1-8号" },
+    "newOrderSheet":  { "name": "订单同步明细", "purpose": "新订单唯一写入位置" },
+    "auditSheet":     { "name": "工作台操作日志", "purpose": "所有操作流水" }
+  }
+}
