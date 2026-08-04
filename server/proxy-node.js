@@ -255,16 +255,16 @@ const server = http.createServer(async (req, res) => {
   if (u.pathname.startsWith('/api/')) {
     const p = u.pathname.slice(5); // 跳过 '/api/' 5 个字符
     try {
-      if (p === '/sheet/info') {
+      if (p === 'sheet/info') {
         const info = await tdocCall('get_sheet_info', { file_id: FILE_ID });
         return send(res, 200, { sheets: unwrapSheets(info) });
       }
-      if (p === '/sheet/range' && req.method === 'GET') {
+      if (p === 'sheet/range' && req.method === 'GET') {
         const data = await tdocCall('get_cell_data', { file_id: FILE_ID, sheet_id: u.query.sheet_id, return_csv: true });
         const csv = (data && data.csv_data) || (data && data.csv) || '';
         return send(res, 200, { range: u.query.range, values: csvToGrid(csv) });
       }
-      if (p === '/sheet/append' && req.method === 'POST') {
+      if (p === 'sheet/append' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req));
         let sid = await resolveSheetId(FILE_ID, body.sheet_name);
         if (!sid) {
@@ -289,14 +289,14 @@ const server = http.createServer(async (req, res) => {
   if (u.pathname.startsWith('/kv/')) {
     const p = u.pathname.slice(4); // 跳过 '/kv/' 4 个字符
     try {
-      if (p === '/get') return send(res, 200, { key: u.query.key, value: kvRead()[u.query.key] ?? null });
-      if (p === '/keys') return send(res, 200, { keys: Object.keys(kvRead()).filter(k => k.startsWith(u.query.prefix || '')) });
-      if (p === '/set' && req.method === 'POST') {
+      if (p === 'get') return send(res, 200, { key: u.query.key, value: kvRead()[u.query.key] ?? null });
+      if (p === 'keys') return send(res, 200, { keys: Object.keys(kvRead()).filter(k => k.startsWith(u.query.prefix || '')) });
+      if (p === 'set' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req));
         kvSet(body.key, body.value);
         return send(res, 200, { ok: true });
       }
-      if (p === '/all' && req.method === 'GET') return send(res, 200, kvRead());
+      if (p === 'all' && req.method === 'GET') return send(res, 200, kvRead());
       return send(res, 404, { error: 'kv not found' });
     } catch (e) { return send(res, 500, { error: e.message }); }
   }
