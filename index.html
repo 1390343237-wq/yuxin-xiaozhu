@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f7f3ec" />
+  <title>愈心小筑 · 主理人工作台</title>
+
+  <!-- Tailwind CSS（CDN，生产可改 Vite 编译） -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // 温暖中性色系
+            sand:    { 50:'#fbf8f3',100:'#f7f3ec',200:'#ece4d3',300:'#dfd1b3',400:'#c9b58d',500:'#a99670' },
+            sage:    { 50:'#f3f6f1',100:'#e2ebdd',200:'#c6d6bd',300:'#a3ba97',400:'#7d9a6f',500:'#5d7d52',600:'#485f3f' },
+            clay:    { 50:'#fbf5f1',100:'#f3e2d6',200:'#e5c1ad',300:'#d09a7e',400:'#b97859',500:'#9b5c41' },
+            ink:     { 50:'#f7f5f2',100:'#e8e3db',200:'#cfc7b8',300:'#9b9484',400:'#6c6557',500:'#4a4337',600:'#2e2a22' },
+            signal:  { ok:'#5d7d52', warn:'#b97859', danger:'#9b5c41', info:'#7a8c6c' }
+          },
+          fontFamily: {
+            sans:  ['"IBM Plex Sans"','"PingFang SC"','"Microsoft YaHei"','system-ui','sans-serif'],
+            serif: ['"Source Serif Pro"','"Noto Serif SC"','Georgia','serif'],
+            mono:  ['"JetBrains Mono"','"Source Code Pro"','monospace']
+          },
+          letterSpacing: { 'wide-2':'0.08em','wide-3':'0.14em' }
+        }
+      }
+    };
+  </script>
+
+  <!-- 字体与图标 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=Source+Serif+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js 图表 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- SortableJS 拖拽 -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+  <!-- 自定义样式 -->
+  <link rel="stylesheet" href="assets/css/app.css" />
+</head>
+
+<body class="bg-sand-100 text-ink-500 font-sans antialiased min-h-screen">
+  <!-- 顶部品牌栏（移动端汉堡 + 标题 + 同步状态） -->
+  <header class="fixed top-0 inset-x-0 z-30 bg-sand-50/90 backdrop-blur border-b border-ink-100/60">
+    <div class="flex items-center h-14 px-4 lg:px-8">
+      <button id="navToggle" class="lg:hidden mr-3 p-2 -ml-2 rounded-lg hover:bg-sand-200/60 transition" aria-label="打开导航">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 品牌名 -->
+      <div class="flex items-baseline gap-2">
+        <span class="font-serif text-xl font-semibold tracking-wide text-ink-600">愈心小筑</span>
+        <span class="text-xs text-ink-400 tracking-widest uppercase">Atelier</span>
+      </div>
+      <span class="hidden sm:inline-block ml-3 text-xs text-ink-400">主理人工作台</span>
+
+      <!-- 中间面包屑 -->
+      <nav class="hidden md:flex ml-10 text-sm text-ink-400" id="breadcrumb">
+        <span>首页</span>
+      </nav>
+
+      <!-- 右侧工具 -->
+      <div class="ml-auto flex items-center gap-2 lg:gap-4">
+        <span id="syncStatus" class="hidden md:inline-flex items-center gap-1.5 text-xs cursor-help" title="数据同步状态">
+          <span class="w-1.5 h-1.5 rounded-full bg-sage-400"></span>
+          <span id="syncText" class="text-sage-600">同步中…</span>
+        </span>
+        <button class="p-2 rounded-lg hover:bg-sand-200/60" title="搜索">
+          <i data-lucide="search" class="w-4 h-4 text-ink-400"></i>
+        </button>
+        <button id="notifBell" class="relative p-2 rounded-lg hover:bg-sand-200/60" title="提醒">
+          <i data-lucide="bell" class="w-4 h-4 text-ink-400"></i>
+          <span id="notifDot" class="hidden absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-clay-500"></span>
+        </button>
+        <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-ink-100/60">
+          <div class="w-7 h-7 rounded-full bg-sage-200 text-sage-600 flex items-center justify-center text-xs font-semibold">小</div>
+          <span class="text-sm text-ink-500">小污</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 侧边导航（PC 固定，移动端抽屉） -->
+  <aside id="sideNav" class="fixed top-14 bottom-0 left-0 w-60 bg-sand-50/70 border-r border-ink-100/60 z-20
+                                -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out
+                                overflow-y-auto">
+    <nav class="p-3 space-y-1 text-sm">
+      <!-- 一级：首页 -->
+      <a href="#/home" data-route="home"
+         class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>首页总览</span>
+      </a>
+
+      <!-- 一级：生活管理中心 -->
+      <div class="nav-group pt-4">
+        <div class="px-3 mb-1.5 text-[11px] uppercase tracking-widest text-ink-300">生活管理</div>
+        <a href="#/life/finance" data-route="life/finance" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+          <i data-lucide="wallet" class="w-4 h-4"></i><span>经济管家</span>
+        </a>
+        <a href="#/life/health" data-route="life/health" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+          <i data-lucide="heart-pulse" class="w-4 h-4"></i><span>健康管家</span>
+        </a>
+        <a href="#/life/growth" data-route="life/growth" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+          <i data-lucide="sprout" class="w-4 h-4"></i><span>个人成长</span>
+        </a>
+        <a href="#/settings" data-route="settings" data-minrole="3" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+          <i data-lucide="settings" class="w-4 h-4"></i><span>设置</span>
+        </a>
+      </div>
+
+      <!-- 一级：工作经营中心 -->
+      <div class="nav-group pt-4">
+        <div class="px-3 mb-1.5 text-[11px] uppercase tracking-widest text-ink-300">工作经营</div>
+        <a href="#/biz/bnb" data-route="biz/bnb" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+          <i data-lucide="bed-double" class="w-4 h-4"></i><span>民宿管理</span>
+        </a>
+        <a href="#/biz/rooms" data-route="biz/rooms" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60 pl-9">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i><span>房态管理</span>
+        </a>
+        <a href="#/biz/media" data-route="biz/media" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-ink-500 hover:bg-sand-200/60">
+          <i data-lucide="megaphone" class="w-4 h-4"></i><span>自媒体营销</span>
+        </a>
+      </div>
+
+      <!-- 底部信息 -->
+      <div class="pt-8 pb-4 px-3 text-[11px] text-ink-300 leading-relaxed">
+        <div class="font-mono">v 1.0.0 · 2026</div>
+        <div class="mt-1">数据源：腾讯文档</div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- 移动端导航遮罩 -->
+  <div id="navMask" class="fixed inset-0 bg-ink-500/30 z-10 hidden lg:hidden"></div>
+
+  <!-- 主内容区 -->
+  <main class="pt-14 lg:pl-60 min-h-screen">
+    <div id="app" class="px-4 lg:px-8 py-6 lg:py-8 max-w-[1400px] mx-auto">
+      <!-- 路由 view 渲染到这里 -->
+      <div class="text-center text-ink-300 py-20">
+        <div class="inline-block animate-pulse">加载中…</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 全局通知 Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm"></div>
+
+  <!-- 全局弹窗（互斥锁房冲突、合规阻断等） -->
+  <div id="modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-ink-600/40 backdrop-blur-sm" data-modal-close></div>
+    <div class="relative mx-auto mt-20 max-w-lg bg-sand-50 rounded-2xl shadow-2xl p-6 lg:p-8 animate-[fadeIn_.18s_ease-out]">
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- 云端同步配置（留空=本地模式；填入运行中的代理地址即开启多端同步） -->
+  <script>
+    // 启用多端云端同步：默认指向本地代理（server/proxy.py）。
+    // 代理未启动时会自动回退到本地模式（mock），不会报错。
+    // 公网部署时改成可访问的代理地址即可实现跨设备云同步。
+    // 代理见 server/proxy.py（提供腾讯文档读取 + 可靠的云端 KV 存储）
+    // 默认使用同域 /api/* 路径（适配 proxy-node.js 一体化部署）；
+    // 本地开发可改为 'http://127.0.0.1:8080'，或在「设置→云端同步」中配置。
+    window.__SHEET_API__ = '';
+    window.__ACCOUNT__ = 'local';
+  </script>
+
+  <!-- 登录闸门（云端账号 + 访问口令） -->
+  <div id="loginGate" class="fixed inset-0 z-50 bg-sand-100 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-sand-50 rounded-2xl shadow-2xl p-7">
+      <div class="text-center mb-6">
+        <div class="font-serif text-2xl font-semibold text-ink-600">愈心小筑</div>
+        <div class="text-xs text-ink-400 tracking-widest uppercase mt-1">主理人工作台</div>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">云端账号</label>
+          <input id="loginAccount" class="field" placeholder="1390343237@shturl." value="1390343237@shturl.">
+        </div>
+        <div>
+          <label class="field-label">访问口令</label>
+          <input id="loginPass" type="password" class="field" placeholder="Yuxin2026!">
+        </div>
+        <button id="loginBtn" class="btn btn-primary w-full justify-center">进入工作台</button>
+        <p class="text-xs text-ink-400 text-center leading-relaxed">账号即云端身份（与腾讯文档访问权限一致）；口令用于本地会话。开启代理后即可多端实时同步。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/lib/date.js"></script>
+  <script src="assets/js/lib/notify.js"></script>
+  <script src="assets/js/lib/sheet.js"></script>
+  <script src="assets/js/lib/lock.js"></script>
+  <script src="assets/js/lib/roomstate.js"></script>
+  <script src="assets/js/lib/compliance.js"></script>
+  <script src="assets/js/lib/ai.js"></script>
+  <script src="assets/js/lib/store.js"></script>
+  <script src="assets/js/lib/router.js"></script>
+  <script src="assets/js/modules/home.js"></script>
+  <script src="assets/js/modules/life-finance.js"></script>
+  <script src="assets/js/modules/life-health.js"></script>
+  <script src="assets/js/modules/life-growth.js"></script>
+  <script src="assets/js/modules/biz-bnb.js"></script>
+  <script src="assets/js/modules/biz-bnb-rooms.js"></script>
+  <script src="assets/js/modules/biz-media.js"></script>
+  <script src="assets/js/modules/biz-settings.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
