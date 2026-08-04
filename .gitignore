@@ -1,0 +1,7 @@
+node_modules/
+.git/
+.workbuddy/
+*.log
+.DS_Store
+server/kv_store.json
+server/__pycache__/
